@@ -298,6 +298,7 @@
 		BOOTENV_RUN_NET_USB_START \
 		BOOTENV_RUN_NET_PCI_ENUM \
 		"dhcp; " \
+		"dhcp; " \
 		"if pxe get; then " \
 			"pxe boot; " \
 		"fi\0"
