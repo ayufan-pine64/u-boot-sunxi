@@ -348,6 +348,7 @@ dtb-$(CONFIG_MACH_SUN50I) += \
 	sun50i-a64-nanopi-a64.dtb \
 	sun50i-a64-olinuxino.dtb \
 	sun50i-a64-orangepi-win.dtb \
+	sun50i-a64-sopine-baseboard.dtb \
 	sun50i-a64-pine64-plus.dtb \
 	sun50i-a64-pine64.dtb
 dtb-$(CONFIG_MACH_SUN9I) += \
