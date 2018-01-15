@@ -12,7 +12,8 @@ obj-$(CONFIG_SPL_SPI_BOOT)	+= fsl_espi_spl.o
 obj-$(CONFIG_SPL_SPI_SUNXI)	+= sunxi_spi_spl.o
 endif
 
-obj-$(CONFIG_SPI_FLASH) += sf_probe.o spi_flash.o spi_flash_ids.o sf.o
-obj-$(CONFIG_SPI_FLASH_DATAFLASH) += sf_dataflash.o
-obj-$(CONFIG_SPI_FLASH_MTD) += sf_mtd.o
-obj-$(CONFIG_SPI_FLASH_SANDBOX) += sandbox.o
+obj-$(CONFIG_$(SPL_TPL_)SPI_FLASH) += sf_probe.o spi_flash.o spi_flash_ids.o sf.o
+obj-$(CONFIG_$(SPL_TPL_)SPI_FLASH_DATAFLASH) += sf_dataflash.o
+obj-$(CONFIG_$(SPL_TPL_)SPI_FLASH_MTD) += sf_mtd.o
+obj-$(CONFIG_$(SPL_TPL_)SPI_FLASH_SANDBOX) += sandbox.o
+

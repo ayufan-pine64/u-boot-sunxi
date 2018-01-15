@@ -438,6 +438,7 @@ struct sunxi_ccm_reg {
 #ifdef CONFIG_MACH_SUN8I_R40
 #define AHB_RESET_OFFSET_SATA		24
 #endif
+#define AHB_RESET_OFFSET_SPI0   20
 #define AHB_RESET_OFFSET_GMAC		17
 #define AHB_RESET_OFFSET_MCTL		14
 #define AHB_RESET_OFFSET_MMC3		11

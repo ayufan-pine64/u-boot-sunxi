@@ -54,7 +54,11 @@ static void sunxi_spi_enable_clock(struct udevice *bus)
 {
 	struct sunxi_ccm_reg * const ccm =
 		(struct sunxi_ccm_reg * const)SUNXI_CCM_BASE;
-	
+
+	if (IS_ENABLED(CONFIG_SUNXI_GEN_SUN6I))
+		setbits_le32(&ccm->ahb_reset0_cfg,
+			     (1 << AHB_RESET_OFFSET_SPI0));
+
 	setbits_le32(&ccm->ahb_gate0, (1 << AHB_GATE_OFFSET_SPI0));
 	writel((1 << 31), &ccm->spi0_clk_cfg);
 }
@@ -122,9 +126,9 @@ static int sunxi_spi_ofdata_to_platdata(struct udevice *bus)
 {
 	struct sunxi_spi_platdata *plat = dev_get_platdata(bus);
 	const void *blob = gd->fdt_blob;
-	int node = bus->of_offset;
+	int node = dev_of_offset(bus);
 
-	plat->regs = (struct sunxi_spi_regs *)dev_get_addr(bus);
+	plat->regs = (struct sunxi_spi_regs *)devfdt_get_addr(bus);
 	plat->activate_delay_us = fdtdec_get_int(
 		blob, node, "spi-activate_delay", 0);
 	plat->deactivate_delay_us = fdtdec_get_int(
@@ -154,10 +158,14 @@ static int sunxi_spi_claim_bus(struct udevice *dev)
 {
 	struct udevice *bus = dev->parent;
 	struct sunxi_spi_priv *priv = dev_get_priv(bus);
+	unsigned int pin_function = SUNXI_GPC_SPI0;
 
 	debug("%s: claiming bus\n", __func__);
 
-	sunxi_spi_setup_pinmux(SUNXI_GPC_SPI0);
+	if (IS_ENABLED(CONFIG_MACH_SUN50I))
+		pin_function = SUN50I_GPC_SPI0;
+
+	sunxi_spi_setup_pinmux(pin_function);
 	sunxi_spi_enable_clock(bus);
 	setbits_le32(&priv->regs->glb_ctl, SUNXI_SPI_CTL_MASTER |
 		SUNXI_SPI_CTL_ENABLE | SUNXI_SPI_CTL_TP | SUNXI_SPI_CTL_SRST);
@@ -211,13 +219,15 @@ static int sunxi_spi_xfer(struct udevice *dev, unsigned int bitlen,
 
 		writel(SUNXI_SPI_BURST_CNT(nbytes), &priv->regs->burst_cnt);
 
-		if (IS_ENABLED(CONFIG_SUNXI_GEN_SUN6I))
-			writel(SUNXI_SPI_BURST_CNT(nbytes),
-				&priv->regs->burst_ctl);
-
 		if (!tx_buf) {
+			if (IS_ENABLED(CONFIG_SUNXI_GEN_SUN6I))
+				writel(SUNXI_SPI_BURST_CNT(0),
+					&priv->regs->burst_ctl);
 			writel(0, &priv->regs->xmit_cnt);
 		} else {
+			if (IS_ENABLED(CONFIG_SUNXI_GEN_SUN6I))
+				writel(SUNXI_SPI_BURST_CNT(nbytes),
+					&priv->regs->burst_ctl);
 			writel(SUNXI_SPI_XMIT_CNT(nbytes),
 				&priv->regs->xmit_cnt);
 
@@ -232,7 +242,7 @@ static int sunxi_spi_xfer(struct udevice *dev, unsigned int bitlen,
 		while (((readl(&priv->regs->fifo_sta) &
 			SUNXI_SPI_FIFO_RF_CNT_MASK) >>
 			SUNXI_SPI_FIFO_RF_CNT_BITS) < nbytes)
-			;
+				;
 
 		for (i = 0; i < nbytes; ++i) {
 			byte = readb(&priv->regs->rx_data);
