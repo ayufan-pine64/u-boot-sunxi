@@ -20,7 +20,8 @@
 			phy-mode = "rgmii";
 			phy = <&phy1>;
 			status = "okay";
-
+                        allwinner,tx-delay-ps = <200>;
+			
 			phy1: ethernet-phy@1 {
 				reg = <1>;
 			};
